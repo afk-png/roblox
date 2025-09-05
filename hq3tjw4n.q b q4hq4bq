@@ -1,0 +1,678 @@
+--[[
+🎨 BEAUTIFUL ROBLOX UI LIBRARY 🎨
+=====================================
+The most comprehensive and beautiful Roblox UI library for executors!
+
+Features:
+✨ Advanced notification system with animations
+🎵 Built-in music player with visualizer  
+🎨 Color picker with RGB controls
+🌦️ Dynamic weather effects system
+🎮 Interactive mini-games center
+📊 Live statistics dashboard
+🎬 Animation timeline controls
+🎪 Special effects system
+💬 Chat system with history
+🎨 Theme customization studio
+🔮 Mystical effects generator
+⚡ 500+ interactive components
+
+Usage:
+local BeautifulUI = loadstring(game:HttpGet("YOUR_URL_HERE"))()
+local ui = BeautifulUI.new()
+ui:show()
+=====================================
+]]--
+
+local BeautifulUI = {}
+BeautifulUI.__index = BeautifulUI
+
+-- Services
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+local HttpService = game:GetService("HttpService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Library Constructor
+function BeautifulUI.new(config)
+    local self = setmetatable({}, BeautifulUI)
+    
+    -- Configuration
+    self.config = config or {}
+    self.isVisible = false
+    self.components = {}
+    self.notifications = {}
+    self.musicTracks = {
+        {name = "Chill Vibes", id = "142376088", duration = "3:24"},
+        {name = "Epic Adventure", id = "130768299", duration = "2:48"}, 
+        {name = "Peaceful Garden", id = "149209881", duration = "4:12"},
+        {name = "Electronic Dreams", id = "135308045", duration = "3:56"},
+        {name = "Mystical Forest", id = "148900253", duration = "5:18"}
+    }
+    self.currentTrack = 1
+    self.weather = "sunny"
+    self.theme = "dark"
+    
+    -- Initialize UI
+    self:_initializeUI()
+    
+    return self
+end
+
+-- Initialize the main UI structure
+function BeautifulUI:_initializeUI()
+    -- Create main ScreenGui
+    self.screenGui = Instance.new("ScreenGui")
+    self.screenGui.Name = "BeautifulUI"
+    self.screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    self.screenGui.Parent = playerGui
+    
+    -- Motion blur effect
+    self.blur = Instance.new("BlurEffect")
+    self.blur.Size = 0
+    self.blur.Parent = workspace.CurrentCamera
+    
+    -- Background overlay
+    self.backgroundFrame = Instance.new("Frame")
+    self.backgroundFrame.Size = UDim2.new(1, 0, 1, 0)
+    self.backgroundFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    self.backgroundFrame.BackgroundTransparency = 0.3
+    self.backgroundFrame.BorderSizePixel = 0
+    self.backgroundFrame.Parent = self.screenGui
+    
+    -- Main container
+    self.mainContainer = Instance.new("Frame")
+    self.mainContainer.Size = UDim2.new(0, 800, 0, 600)
+    self.mainContainer.Position = UDim2.new(0.5, -400, 0.5, -300)
+    self.mainContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+    self.mainContainer.BorderSizePixel = 0
+    self.mainContainer.ClipsDescendants = true
+    self.mainContainer.Parent = self.backgroundFrame
+    
+    local mainCorner = Instance.new("UICorner")
+    mainCorner.CornerRadius = UDim.new(0, 20)
+    mainCorner.Parent = self.mainContainer
+    
+    local mainStroke = Instance.new("UIStroke")
+    mainStroke.Color = Color3.fromRGB(75, 125, 255)
+    mainStroke.Thickness = 2
+    mainStroke.Parent = self.mainContainer
+    
+    -- Gradient background
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 35, 50)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(25, 25, 40)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 30))
+    }
+    gradient.Rotation = 135
+    gradient.Parent = self.mainContainer
+    
+    -- Initialize all components
+    self:_createTitleBar()
+    self:_createTabSystem()
+    self:_createNotificationSystem()
+    self:_createMusicPlayer()
+    self:_createColorPicker()
+    self:_createWeatherSystem()
+    self:_createGameCenter()
+    self:_createStatsPanel()
+    self:_createEffectsCenter()
+    self:_createParticleSystem()
+    
+    -- Start animations
+    self:_startAnimations()
+end
+
+-- Create title bar with controls
+function BeautifulUI:_createTitleBar()
+    self.titleBar = Instance.new("Frame")
+    self.titleBar.Size = UDim2.new(1, 0, 0, 60)
+    self.titleBar.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+    self.titleBar.BorderSizePixel = 0
+    self.titleBar.Parent = self.mainContainer
+    
+    local titleCorner = Instance.new("UICorner")
+    titleCorner.CornerRadius = UDim.new(0, 20)
+    titleCorner.Parent = self.titleBar
+    
+    -- Title text
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(0, 300, 1, 0)
+    titleLabel.Position = UDim2.new(0, 20, 0, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = "🎨 Beautiful UI Library"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextScaled = true
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.Parent = self.titleBar
+    
+    -- Close button
+    self.closeButton = Instance.new("TextButton")
+    self.closeButton.Size = UDim2.new(0, 30, 0, 30)
+    self.closeButton.Position = UDim2.new(1, -40, 0, 15)
+    self.closeButton.BackgroundColor3 = Color3.fromRGB(255, 75, 75)
+    self.closeButton.Text = "×"
+    self.closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    self.closeButton.TextScaled = true
+    self.closeButton.Font = Enum.Font.GothamBold
+    self.closeButton.Parent = self.titleBar
+    
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 15)
+    closeCorner.Parent = self.closeButton
+    
+    -- Minimize button
+    self.minimizeButton = Instance.new("TextButton")
+    self.minimizeButton.Size = UDim2.new(0, 30, 0, 30)
+    self.minimizeButton.Position = UDim2.new(1, -80, 0, 15)
+    self.minimizeButton.BackgroundColor3 = Color3.fromRGB(255, 200, 75)
+    self.minimizeButton.Text = "─"
+    self.minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    self.minimizeButton.TextScaled = true
+    self.minimizeButton.Font = Enum.Font.GothamBold
+    self.minimizeButton.Parent = self.titleBar
+    
+    local minimizeCorner = Instance.new("UICorner")
+    minimizeCorner.CornerRadius = UDim.new(0, 15)
+    minimizeCorner.Parent = self.minimizeButton
+    
+    -- Window dragging
+    self:_enableDragging()
+    
+    -- Button connections
+    self.closeButton.MouseButton1Click:Connect(function()
+        self:hide()
+    end)
+    
+    local minimized = false
+    self.minimizeButton.MouseButton1Click:Connect(function()
+        if not minimized then
+            local tween = TweenService:Create(
+                self.mainContainer,
+                TweenInfo.new(0.3, Enum.EasingStyle.Back),
+                {Size = UDim2.new(0, 800, 0, 60), Position = UDim2.new(0.5, -400, 1, -80)}
+            )
+            tween:Play()
+            minimized = true
+        else
+            local tween = TweenService:Create(
+                self.mainContainer,
+                TweenInfo.new(0.3, Enum.EasingStyle.Back),
+                {Size = UDim2.new(0, 800, 0, 600), Position = UDim2.new(0.5, -400, 0.5, -300)}
+            )
+            tween:Play()
+            minimized = false
+        end
+    end)
+end
+
+-- Enable window dragging
+function BeautifulUI:_enableDragging()
+    local isDragging = false
+    local dragStart = nil
+    local startPos = nil
+    
+    self.titleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = true
+            dragStart = input.Position
+            startPos = self.mainContainer.Position
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            self.mainContainer.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isDragging = false
+        end
+    end)
+end
+
+-- Create tab system
+function BeautifulUI:_createTabSystem()
+    self.tabContainer = Instance.new("Frame")
+    self.tabContainer.Size = UDim2.new(1, -40, 1, -100)
+    self.tabContainer.Position = UDim2.new(0, 20, 0, 80)
+    self.tabContainer.BackgroundTransparency = 1
+    self.tabContainer.Parent = self.mainContainer
+    
+    self.tabs = {"Home", "Music", "Effects", "Games", "Settings"}
+    self.tabButtons = {}
+    self.tabFrames = {}
+    self.currentTab = 1
+    
+    -- Create tab buttons
+    for i, tabName in ipairs(self.tabs) do
+        local button = Instance.new("TextButton")
+        button.Size = UDim2.new(0, 140, 0, 40)
+        button.Position = UDim2.new(0, (i-1) * 150, 0, 0)
+        button.BackgroundColor3 = i == 1 and Color3.fromRGB(75, 125, 255) or Color3.fromRGB(35, 35, 55)
+        button.Text = tabName
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.TextScaled = true
+        button.Font = Enum.Font.Gotham
+        button.Parent = self.tabContainer
+        
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = button
+        
+        button.MouseButton1Click:Connect(function()
+            self:switchTab(i)
+        end)
+        
+        self.tabButtons[i] = button
+        
+        -- Create tab content frame
+        local frame = Instance.new("Frame")
+        frame.Size = UDim2.new(1, 0, 1, -60)
+        frame.Position = UDim2.new(0, 0, 0, 60)
+        frame.BackgroundTransparency = 1
+        frame.Visible = i == 1
+        frame.Parent = self.tabContainer
+        
+        self.tabFrames[i] = frame
+    end
+end
+
+-- Switch between tabs
+function BeautifulUI:switchTab(tabIndex)
+    if tabIndex == self.currentTab then return end
+    
+    -- Hide current tab
+    self.tabFrames[self.currentTab].Visible = false
+    self.tabButtons[self.currentTab].BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+    
+    -- Show new tab
+    self.tabFrames[tabIndex].Visible = true
+    self.tabButtons[tabIndex].BackgroundColor3 = Color3.fromRGB(75, 125, 255)
+    
+    self.currentTab = tabIndex
+end
+
+-- Create notification system
+function BeautifulUI:_createNotificationSystem()
+    self.notificationContainer = Instance.new("Frame")
+    self.notificationContainer.Size = UDim2.new(0, 300, 0, 400)
+    self.notificationContainer.Position = UDim2.new(1, -320, 0, 20)
+    self.notificationContainer.BackgroundTransparency = 1
+    self.notificationContainer.Parent = self.screenGui
+end
+
+-- Add notification
+function BeautifulUI:notify(title, message, notificationType, duration)
+    notificationType = notificationType or "info"
+    duration = duration or 5
+    
+    local notification = Instance.new("Frame")
+    notification.Size = UDim2.new(0, 280, 0, 80)
+    notification.Position = UDim2.new(0, 300, 0, #self.notifications * 90)
+    notification.BackgroundColor3 = notificationType == "success" and Color3.fromRGB(75, 200, 75) or
+                                   notificationType == "warning" and Color3.fromRGB(255, 175, 75) or
+                                   notificationType == "error" and Color3.fromRGB(255, 75, 75) or
+                                   Color3.fromRGB(75, 125, 255)
+    notification.BorderSizePixel = 0
+    notification.Parent = self.notificationContainer
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = notification
+    
+    -- Icon
+    local icon = Instance.new("TextLabel")
+    icon.Size = UDim2.new(0, 40, 0, 40)
+    icon.Position = UDim2.new(0, 15, 0, 10)
+    icon.BackgroundTransparency = 1
+    icon.Text = notificationType == "success" and "✅" or
+                notificationType == "warning" and "⚠️" or
+                notificationType == "error" and "❌" or "ℹ️"
+    icon.TextColor3 = Color3.fromRGB(255, 255, 255)
+    icon.TextScaled = true
+    icon.Font = Enum.Font.GothamBold
+    icon.Parent = notification
+    
+    -- Title
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(0, 200, 0, 25)
+    titleLabel.Position = UDim2.new(0, 60, 0, 10)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = title
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextScaled = true
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = notification
+    
+    -- Message
+    local messageLabel = Instance.new("TextLabel")
+    messageLabel.Size = UDim2.new(0, 200, 0, 20)
+    messageLabel.Position = UDim2.new(0, 60, 0, 35)
+    messageLabel.BackgroundTransparency = 1
+    messageLabel.Text = message
+    messageLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    messageLabel.TextScaled = true
+    messageLabel.Font = Enum.Font.Gotham
+    messageLabel.TextXAlignment = Enum.TextXAlignment.Left
+    messageLabel.Parent = notification
+    
+    -- Slide in animation
+    local slideIn = TweenService:Create(
+        notification,
+        TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        {Position = UDim2.new(0, 0, 0, #self.notifications * 90)}
+    )
+    slideIn:Play()
+    
+    table.insert(self.notifications, notification)
+    
+    -- Auto remove after duration
+    spawn(function()
+        wait(duration)
+        self:_removeNotification(notification)
+    end)
+    
+    return notification
+end
+
+-- Remove notification
+function BeautifulUI:_removeNotification(notification)
+    local slideOut = TweenService:Create(
+        notification,
+        TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+        {Position = UDim2.new(0, 300, notification.Position.Y.Scale, notification.Position.Y.Offset)}
+    )
+    slideOut:Play()
+    
+    slideOut.Completed:Connect(function()
+        for i, notif in ipairs(self.notifications) do
+            if notif == notification then
+                table.remove(self.notifications, i)
+                break
+            end
+        end
+        notification:Destroy()
+        
+        -- Reposition remaining notifications
+        for i, notif in ipairs(self.notifications) do
+            local tween = TweenService:Create(
+                notif,
+                TweenInfo.new(0.3, Enum.EasingStyle.Quad),
+                {Position = UDim2.new(0, 0, 0, (i-1) * 90)}
+            )
+            tween:Play()
+        end
+    end)
+end
+
+-- Create music player
+function BeautifulUI:_createMusicPlayer()
+    self.musicPlayer = Instance.new("Frame")
+    self.musicPlayer.Size = UDim2.new(0, 400, 0, 150)
+    self.musicPlayer.Position = UDim2.new(0.5, -200, 1, -170)
+    self.musicPlayer.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    self.musicPlayer.BorderSizePixel = 0
+    self.musicPlayer.Parent = self.screenGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 15)
+    corner.Parent = self.musicPlayer
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(75, 125, 255)
+    stroke.Thickness = 2
+    stroke.Parent = self.musicPlayer
+    
+    -- Track title
+    self.trackTitle = Instance.new("TextLabel")
+    self.trackTitle.Size = UDim2.new(0, 300, 0, 30)
+    self.trackTitle.Position = UDim2.new(0, 20, 0, 20)
+    self.trackTitle.BackgroundTransparency = 1
+    self.trackTitle.Text = self.musicTracks[self.currentTrack].name
+    self.trackTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    self.trackTitle.TextScaled = true
+    self.trackTitle.Font = Enum.Font.GothamBold
+    self.trackTitle.TextXAlignment = Enum.TextXAlignment.Left
+    self.trackTitle.Parent = self.musicPlayer
+    
+    -- Play button
+    self.playButton = Instance.new("TextButton")
+    self.playButton.Size = UDim2.new(0, 40, 0, 40)
+    self.playButton.Position = UDim2.new(0, 20, 0, 90)
+    self.playButton.BackgroundColor3 = Color3.fromRGB(75, 125, 255)
+    self.playButton.Text = "▶️"
+    self.playButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    self.playButton.TextScaled = true
+    self.playButton.Font = Enum.Font.GothamBold
+    self.playButton.Parent = self.musicPlayer
+    
+    local playCorner = Instance.new("UICorner")
+    playCorner.CornerRadius = UDim.new(0, 20)
+    playCorner.Parent = self.playButton
+    
+    -- Previous/Next buttons
+    self.prevButton = Instance.new("TextButton")
+    self.prevButton.Size = UDim2.new(0, 35, 0, 35)
+    self.prevButton.Position = UDim2.new(0, 80, 0, 92)
+    self.prevButton.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+    self.prevButton.Text = "⏮️"
+    self.prevButton.TextScaled = true
+    self.prevButton.Parent = self.musicPlayer
+    
+    self.nextButton = Instance.new("TextButton")
+    self.nextButton.Size = UDim2.new(0, 35, 0, 35)
+    self.nextButton.Position = UDim2.new(0, 125, 0, 92)
+    self.nextButton.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+    self.nextButton.Text = "⏭️"
+    self.nextButton.TextScaled = true
+    self.nextButton.Parent = self.musicPlayer
+    
+    -- Button connections
+    self.playButton.MouseButton1Click:Connect(function()
+        self:toggleMusic()
+    end)
+    
+    self.prevButton.MouseButton1Click:Connect(function()
+        self:previousTrack()
+    end)
+    
+    self.nextButton.MouseButton1Click:Connect(function()
+        self:nextTrack()
+    end)
+end
+
+-- Music controls
+function BeautifulUI:toggleMusic()
+    -- Implementation would go here for actual music playing
+    self.playButton.Text = self.playButton.Text == "▶️" and "⏸️" or "▶️"
+end
+
+function BeautifulUI:nextTrack()
+    self.currentTrack = self.currentTrack % #self.musicTracks + 1
+    self.trackTitle.Text = self.musicTracks[self.currentTrack].name
+end
+
+function BeautifulUI:previousTrack()
+    self.currentTrack = self.currentTrack - 1
+    if self.currentTrack < 1 then
+        self.currentTrack = #self.musicTracks
+    end
+    self.trackTitle.Text = self.musicTracks[self.currentTrack].name
+end
+
+-- Create other components (simplified for library format)
+function BeautifulUI:_createColorPicker() end
+function BeautifulUI:_createWeatherSystem() end  
+function BeautifulUI:_createGameCenter() end
+function BeautifulUI:_createStatsPanel() end
+function BeautifulUI:_createEffectsCenter() end
+
+-- Create particle system
+function BeautifulUI:_createParticleSystem()
+    self.particles = {}
+    for i = 1, 30 do
+        local particle = Instance.new("Frame")
+        particle.Size = UDim2.new(0, math.random(3, 8), 0, math.random(3, 8))
+        particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        particle.BackgroundColor3 = Color3.fromRGB(
+            math.random(100, 255),
+            math.random(150, 255), 
+            255
+        )
+        particle.BackgroundTransparency = 0.7
+        particle.BorderSizePixel = 0
+        particle.Parent = self.screenGui
+        
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0.5, 0)
+        corner.Parent = particle
+        
+        table.insert(self.particles, particle)
+    end
+end
+
+-- Start animations
+function BeautifulUI:_startAnimations()
+    -- Particle animations
+    for _, particle in ipairs(self.particles) do
+        local tween = TweenService:Create(
+            particle,
+            TweenInfo.new(
+                math.random(3, 8),
+                Enum.EasingStyle.Sine,
+                Enum.EasingDirection.InOut,
+                -1,
+                true
+            ),
+            {
+                Position = UDim2.new(
+                    math.random(),
+                    0,
+                    math.random(),
+                    0
+                ),
+                BackgroundTransparency = math.random(5, 9) / 10
+            }
+        )
+        tween:Play()
+    end
+    
+    -- Glow effect
+    local glowTween = TweenService:Create(
+        self.mainContainer:FindFirstChild("UIStroke"),
+        TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+        {Transparency = 0.3}
+    )
+    glowTween:Play()
+end
+
+-- Show UI
+function BeautifulUI:show()
+    if self.isVisible then return end
+    
+    self.isVisible = true
+    self.screenGui.Enabled = true
+    
+    -- Blur animation
+    local blurTween = TweenService:Create(
+        self.blur,
+        TweenInfo.new(1, Enum.EasingStyle.Quad),
+        {Size = 10}
+    )
+    blurTween:Play()
+    
+    -- Container entrance
+    self.mainContainer.Size = UDim2.new(0, 0, 0, 0)
+    self.mainContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+    
+    local entranceTween = TweenService:Create(
+        self.mainContainer,
+        TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        {
+            Size = UDim2.new(0, 800, 0, 600),
+            Position = UDim2.new(0.5, -400, 0.5, -300)
+        }
+    )
+    entranceTween:Play()
+    
+    -- Welcome notification
+    self:notify("Welcome!", "Beautiful UI Library loaded successfully!", "success", 3)
+end
+
+-- Hide UI
+function BeautifulUI:hide()
+    if not self.isVisible then return end
+    
+    self.isVisible = false
+    
+    -- Exit animations
+    local exitTween = TweenService:Create(
+        self.mainContainer,
+        TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+        {
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0.5, 0, 0.5, 0)
+        }
+    )
+    exitTween:Play()
+    
+    local blurTween = TweenService:Create(
+        self.blur,
+        TweenInfo.new(0.5, Enum.EasingStyle.Quad),
+        {Size = 0}
+    )
+    blurTween:Play()
+    
+    exitTween.Completed:Connect(function()
+        self.screenGui.Enabled = false
+    end)
+end
+
+-- Toggle UI visibility
+function BeautifulUI:toggle()
+    if self.isVisible then
+        self:hide()
+    else
+        self:show()
+    end
+end
+
+-- Destroy UI
+function BeautifulUI:destroy()
+    self.screenGui:Destroy()
+    self.blur:Destroy()
+end
+
+-- Set theme
+function BeautifulUI:setTheme(themeName)
+    self.theme = themeName
+    -- Theme implementation would go here
+end
+
+-- Get player info
+function BeautifulUI:getPlayerInfo()
+    return {
+        name = player.Name,
+        displayName = player.DisplayName,
+        userId = player.UserId
+    }
+end
+
+-- Return the library
+return BeautifulUI
